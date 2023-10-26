@@ -80,3 +80,148 @@ def add_final_state(AEF, state):
     AEF["final_state"] = state
 
 
+
+
+def remove_state(AEF, state):
+    """
+    Cette fonction permet de retirer un état de l'automate 
+    
+    """
+    # tout d'abord on vérifie que l'état qu'on veut supprimer existe, si il n'existe pas on renvoit une erreur 
+    if state not in AEF["states"]:
+        raise ValueError ("L'état que vous voulez supprimer n'existe pas dans l'automate !")
+    
+    # On retire l'état voulu grâce à la méthode de suppression d'un set() qui est .remove()
+    AEF["states"].remove(state)
+
+    # On retire l'état final avec la méthode discard() qui permet de supprimer un élement si celui ci existe, sinon elle ne fait rien ( si on avait mis remove, on aurait eu une erreur)
+    # On fait cela car l'état qu'on supprime peut être final donc si on supprime un état, il faut le supprimé de la clé "final_states"
+    AEF["final_states"].discard(state)
+
+    # Ensuite il faut aussi supprimer l'état s'il est initial ( on supprime la valeur de la clé "start_state" de notre dictionnaire AEF)
+    if AEF["start_state"] == state :
+            AEF["start_state"] = None
+    
+    # Ensuite on parcourt toutes les liaisons en utilisant la méthode keys() des dictionnaires. Le point de départ de toute liaison est from_state 
+    
+    for from_state in list(AEF["transitions".keys()]):
+    
+    # On parcourt les liaisons pour chaque chaque état. On a vérifier que state n'est pas initial auparavant, donc on prend l'état de départ de la liaison 
+        for symbol in list(AEF["transitions"][from_state].keys()):
+    
+    # On récupère l'état final de la liaison 
+            to_state= AEF["transitions"][from_state][symbol]
+
+    # Si la liaison mène à l'état qui sera supprimé, on supprime la liaison grâce à del 
+            if to_state ==state :
+                del AEF["transitions"][from_state][symbol]
+    
+    # On supprime l'état si il n'a aucune liaison sortante vers un autre état 
+    # (si vous supprimez l'état de destination d'une laision, il faut aussi supprimer l'état de départ du dictionnaire "transtitions" uniquement)
+        if not AEF["transitions"][from_state]:
+            del AEF["transitions"][from_state]
+
+
+
+def remove_transition (AEF, from_state, to_state, symbol) :
+    """
+    Cette fonction permet de supprimer une liaison précise de l'AEF
+    """
+    # On vérifie que l'état de départ ou l'état d'arrivée de la liaison existe 
+    if from_state not in AEF["states"] or to_state not in AEF["states"]:
+        raise ValueError ("L'état dont vous essayez de supprimer la liaison n'existe pas dans votre automate !")
+    
+    # On vérifie que le symbol à supprimer existe ou pas dans le langage de l'automate
+    if symbol not in AEF["alphabet"]:
+        raise ValueError ("la liaison que vous souhaitez supprimer ne posséde pas ce symbol !")
+    
+    # Il se peut que les états de départ et d'arrivée existent dans l'automate, ainsi que le symbol 
+    # Il faut donc vérifier dans les liaisons si la liaison existe entre les 2 états, possédant le symbol choisi 
+    if from_state not in AEF["transitions"] or symbol not in AEF["transitions"][from_state] or AEF["transitions"][from_state][symbol] != to_state :
+        raise ValueError ("La liaison que vous voulez supprimer n'existe pas !")
+    
+    # Si on vérifie toutes les conditions du if, on peut alors supprimer le symbol de la liaison 
+    del AEF["transitions"][from_state][symbol]
+
+    # Si le symbol était rattaché à un état de départ, on supprime cette état des liaisons 
+    if not AEF["transitions"][from_state]:
+        del AEF["transitions"][from_state]      # pas besoin de supprimer l'état d'arrivée car en supprime le symbol qui est la clé de la valeur de cet état !
+    
+
+
+def import_AEF(filename) :
+    """
+    Cette fonction permet d'importer un AEF depuis un fichier enregistré dans le même dossier que ce projet (en local)
+    On ouvre le fichier en mode lecture, on vérifie qu'il contienne bien les clés du dictionnaire de l'AEF et on retrun AEF
+
+    """
+    with open(filename, "r") as f:
+        AEF = eval(f.read())
+    if not isinstance(AEF, dict) or "states" not in AEF or "alphabet" not in AEF or "transitions" not in AEF or "start_state" not in AEF or "final_states" not in AEF :
+        raise ValueError ("le fichier doit conteneir un AEF")
+    return AEF 
+
+
+def export_AEF(AEF, filename):
+    """
+    Cette fonction permet d'exporter un AEF dans un fichier en local 
+
+    """
+    with open(filename, "w") as f :
+        f.write(str(AEF))
+    
+
+
+
+def verifword (AEF) : 
+    """
+    Cette fonction permet de vérifier si l'automate reconnait un mot grâce à son langage 
+
+    """
+    # On demande à l'utilisateur de donné le mot qu'il souhaite vérifier 
+    answer: str = input ("\nEcrivez votre mot : ")
+    
+    # On initialise l'état actuel à l'état initial de l'automate 
+    current_state = AEF["start_state"]
+
+    # On parcourt tous les symbols du mot saisi par l'utilisateur 
+    for symbol in answer : 
+
+        # Si le symbol n'éxiste pas dans l'automate en affiche une erreur 
+        if symbol not in AEF["alphabet"]:
+            print ("\nLe symbol" + "\033[1m\033[91m" + symbol + "\033[0m\033[0m" + " n'existe pas dans le langage de l'AEF")
+            return False 
+        
+        # On vérifie si l'état actuel est dans les liaisons ou si ses symbols de liaisons existent 
+        if current_state not in AEF["transitions"] or symbol not in AEF["transitions"][current_state]:
+            print ("\nVotre mot n'est pas reconnu dans l'AEF")
+            print ("il n'y a pas de liaison entre l'état " , current_state, " et le symbol" , symbol)
+            return False
+        # On met à jour 
+        current_state = AEF["transitions"][current_state][symbol]
+
+    print ("\nVotre mot a été reconnu avec succés par le langage de l'automate")
+    return current_state in AEF["final_states"]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
