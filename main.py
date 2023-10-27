@@ -77,8 +77,7 @@ def add_final_state(AEF, state):
     """
     if state not in AEF["states"]:
         raise ValueError ("L'état n'éxiste pas dans l'AEF")
-    AEF["final_state"] = state
-
+    AEF["final_states"].add(state)
 
 
 
@@ -104,7 +103,7 @@ def remove_state(AEF, state):
     
     # Ensuite on parcourt toutes les liaisons en utilisant la méthode keys() des dictionnaires. Le point de départ de toute liaison est from_state 
     
-    for from_state in list(AEF["transitions".keys()]):
+    for from_state in list(AEF["transitions"].keys()):
     
     # On parcourt les liaisons pour chaque chaque état. On a vérifier que state n'est pas initial auparavant, donc on prend l'état de départ de la liaison 
         for symbol in list(AEF["transitions"][from_state].keys()):
@@ -205,6 +204,77 @@ def verifword (AEF) :
 
 
 
+def is_complete(AEF) :
+    """
+    Cette fonction vérifie si l'automate est complet ou pas
+
+    """
+    # On initialise alphabet 
+    alphabet = AEF["alphabet"]
+    
+    # On parcourt tous les états de l'automate
+    for state in AEF["states"]:
+        
+        # On vérifie si l'état est dans les liaisons, donc si il a au moins une lisaison avec un autre état 
+        if state not in AEF["transitions"]:
+            print ("\nL'état " + "\033[1m\033[91m" + state + "\033[0m\033[0m" + " ne posséde aucune liaison \nAutomate incomplet !")
+            return False 
+        
+        # On parcourt les symbols de l'alphabet de l'automate 
+        for symbol in alphabet :
+
+            # On vérifie si les états dans la clé "transitions" ont tous au moins une liaison avec chaque symbol de l'alphabet
+            if symbol not in AEF["transitions"][state]:
+                print ("\nLe symbol " + "\033[1m\033[91m" + symbol + "\033[0m\033[0m" + "de l'état " + "\033[1m\033[91m" + state + "\033[0m\033[0m" + " n'éxiste pas \nAutomate incomplet !")
+                return False
+    print ("\nVotre automate est complet !")
+    return True
+
+
+def make_complete(AEF) :
+    """
+    Cette fonction permet de rendre un automate complet. Elle posséde la même structure que la fonction is_complete(AEF)
+
+    """
+    # Si l'automate est complet, on ne fait rien
+    if is_complete(AEF):
+        print ("\nVotre automate est déjà complet !")
+        return True 
+    
+    # On ajoute un nouvel état phi grâce à la fonction add_state(AEF, state)
+    add_state(AEF, state="phi")
+    alphabet = AEF["alphabet"]
+
+    for state in AEF["states"]:
+        for symbol in alphabet:
+            if state not in AEF["transitions"]:
+                
+                # On ajoute une liaison à l'état phi avec un symbol en utilisant add_transition 
+                add_transition(AEF, from_state= state, to_state= "phi", symbol= symbol)
+
+            if symbol not in AEF["transitions"][state]:
+
+                # On ajoute une liaison à phi si un état n'a pas de liaison avec un autre avec un symbol de l'alphabet 
+                add_transition(AEF, from_state= state, to_state= "phi", symbol= symbol)
+                # On pourra vérifier facilement avec la fonction is_complete si l'AEF est complet 
+
+
+
+
+
+def firstchoice () :
+    """
+    Cette fonction propose différente action avant de modifier un AEF
+
+    """
+    print ("\nBonjour :) \nQue souhaitez-vous faire ?")
+    print ("1. Créer un AEF ")
+    print ("2. Importer un AEF ")
+    print ("3. Modifier un AEF existant ")
+    print ("4. Exporter un AEF ")
+    print ("5. Rien faire, vous aimez pas trop les automates\n ")
+    choice = input("Entrez votre choix : ")
+    return choice 
 
 
 
@@ -218,10 +288,110 @@ def verifword (AEF) :
 
 
 
+def modify_AEF (AEF) :
+    """
+    Cette fonction permet de faire pleins d'actions sur un AEF
+
+    """
+    # Tant que l'utilisateur n'a pas fini de modifier son AEF, on lui propose des actions 
+    while True :
+        print ("\n\nAEF actuel : ")
+        print (AEF, "\n\n")
+        print ("Que voulez-vous faire ?")
+        print ("1. Ajouter un état") 
+        print ("2. Ajouter une transition")
+        print ("3. Définir l'état initial")
+        print ("4. Ajouter un état final")
+        print ("5. Supprimer un état")
+        print ("6. Supprimer une transition")
+        print ("7. Vérifier si un mot est reconnu par votre AEF")
+        print ("8. Vérifier si votre AEF est complet")
+        print ("9. Rendre un AEF complet")
+        print ("10. Vérifier si votre AEF est déterministe")
+        print ("11. Rendre votre AEF déterministe")
+        
+        print ("20. Quitter")
+        
+        # On initialise une variable grâce à la méthode input(), qui prendra la valeur de la réponse de l'utilisateur 
+        choice = input ("\nEntrez votre choix : ")
+
+        # A chaque réponse, on dédie les fonctions à utiliser 
+        if choice =="1" :
+            state = input ("Entrez le nom de l'état : ")
+            add_state(AEF, state)
+        elif choice == "2" :
+            from_state = input ("Entrez le nom de l'état de départ : ")
+            to_state= input ("Entrez le nom de l'état d'arrivée : ")
+            symbol = input ("Entrez le symbol de la transition : ")
+            add_transition (AEF, from_state, to_state, symbol)
+        elif choice == "3" :
+            state = input("Entrez le nom de l'état initial : ")
+            set_start_state (AEF, state)
+        elif choice == "4" :
+            state = input ("Entrez le nom de l'état final : ")
+            add_final_state (AEF, state)
+        elif choice == "5" :
+            state = input("Entrez le nom de l'état à supprimer : ")
+            remove_state (AEF, state)
+        elif choice == "6" :
+            from_state = input ("Entrez le nom de l'état de départ de la transition à supprimer : ")
+            to_state= input ("Entrez le nom de l'état d'arrivée de la transition à supprimer : ")
+            symbol = input ("Entrez le symbol de la transition à supprimer : ")
+            remove_transition(AEF, from_state, to_state, symbol)
+        elif choice == "7" :
+            verifword(AEF)
+        elif choice == "8" :
+            is_complete(AEF)
+        elif choice == "9" :
+            make_complete(AEF)
+        
+        # à finir ici !!!!!!!!!!!!!!!!!!!
+
+    
+        elif choice == "20" :
+            answer = input ("Avant de quitter, voulez vous exporter votre AEF sur un fichier ?  :  ")
+            if answer == "1" :
+                export_AEF(AEF, "AEF_exported.txt")
+            else :
+                break
+        else :
+            print ("Choix invalide !!!")
+
+
+
+def main() :
+    """
+    Cette fonction est le main du projet, permettant d'utiliser toutes les fonctionalités et gérer un automate 
+    
+    """
+    # On initialise l'AEF à un dictionnaire vide 
+    AEF = {}
+
+    # On utilise la fonction firstchoice() pour avoir la première réponse de l'utilisateur. On l'utilise qu'une fois lorsqu'on lance un
+    answer = firstchoice()
+
+    # A chaque réponse de l'utilisateur, on dédie les fonctions à utiliser
+    if answer == "1" :
+        AEF = create_AEF()
+        modify_AEF(AEF)
+    elif answer == "2" : 
+        AEF = import_AEF("AEF.txt")
+    elif answer == "3" : 
+        AEF = import_AEF("AEF.txt")
+        modify_AEF(AEF)
+    elif answer == "4" :
+        AEF = input ("Ecrivez l'AEF que vous souhaitez exporter :  ")
+        export_AEF (AEF, "AEF_exported.txt")
+    elif answer == "5" :
+        print ("FIN")
+    else :
+        raise ValueError ("Choix invalide ! ")
+
+    print ("\nVotre AEF est : \n", AEF)
 
 
 
 
-
-
+if __name__ == "__main__" :
+    main()
 
