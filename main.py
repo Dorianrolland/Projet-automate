@@ -55,9 +55,20 @@ def add_transition (AEF, from_state, to_state, symbol):
         AEF["transitions"][from_state] = {}
 
     # On met l'état de départ dans transitions, on lui ajoute le nouveau dictionnaire vide avec comme clé symbol, puis la valuer de la clé sera l'état d'arrivée
- 
-    AEF["transitions"][from_state][symbol] = to_state
-
+    if symbol not in AEF["transitions"][from_state] :
+        AEF["transitions"][from_state][symbol] = to_state
+    else :
+        if isinstance(AEF["transitions"][from_state][symbol], list):
+            if to_state not in AEF["transitions"][from_state][symbol] :
+                AEF["transitions"][from_state][symbol].append(to_state)
+            else :
+                print ("\nIl y a déjà une transition identique pour cet élement et ce symbol ")
+        else :
+            if AEF["transitions"][from_state][symbol] != to_state :
+                AEF["transitions"][from_state][symbol] = [AEF["transitions"][from_state][symbol], to_state]
+            else : 
+                print ("\nIl y a déjà une transition identique pour cet élement et ce symbol ")
+                
 
 def set_start_state (AEF, state): 
     """
@@ -104,21 +115,27 @@ def remove_state(AEF, state):
     # Ensuite on parcourt toutes les liaisons en utilisant la méthode keys() des dictionnaires. Le point de départ de toute liaison est from_state 
     
     for from_state in list(AEF["transitions"].keys()):
-    
-    # On parcourt les liaisons pour chaque chaque état. On a vérifier que state n'est pas initial auparavant, donc on prend l'état de départ de la liaison 
-        for symbol in list(AEF["transitions"][from_state].keys()):
-    
-    # On récupère l'état final de la liaison 
-            to_state= AEF["transitions"][from_state][symbol]
-
-    # Si la liaison mène à l'état qui sera supprimé, on supprime la liaison grâce à del 
-            if to_state ==state :
-                del AEF["transitions"][from_state][symbol]
-    
-    # On supprime l'état si il n'a aucune liaison sortante vers un autre état 
-    # (si vous supprimez l'état de destination d'une laision, il faut aussi supprimer l'état de départ du dictionnaire "transtitions" uniquement)
-        if not AEF["transitions"][from_state]:
+        if from_state == state :
             del AEF["transitions"][from_state]
+        else : 
+            # On parcourt les liaisons pour chaque chaque état. On a vérifier que state n'est pas initial auparavant, donc on prend l'état de départ de la liaison 
+            for symbol in list(AEF["transitions"][from_state].keys()):
+                
+                to_state= AEF["transitions"][from_state][symbol]    # On récupère l'état final de la liaison 
+                if isinstance(to_state, list):
+                    if state in to_state :
+                        to_state.remove(state)
+                        if len(to_state) == 1 :
+                            AEF["transitions"][from_state][symbol] = to_state[0]
+                    elif len(to_state) == 0 :
+                        del AEF["transitions"][from_state][symbol]
+                elif to_state == state :  # Si la liaison mène à l'état qui sera supprimé, on supprime la liaison grâce à del 
+                    del AEF["transitions"][from_state][symbol]
+            if not AEF["transitions"][from_state] : 
+                del AEF["transitions"][from_state]
+            else :
+                AEF["transitions"][from_state] = {symbol : to_state for symbol, to_state in AEF["transitions"][from_state].items() if to_state != state}
+  
 
 
 
@@ -128,24 +145,32 @@ def remove_transition (AEF, from_state, to_state, symbol) :
     """
     # On vérifie que l'état de départ ou l'état d'arrivée de la liaison existe 
     if from_state not in AEF["states"] or to_state not in AEF["states"]:
-        raise ValueError ("L'état dont vous essayez de supprimer la liaison n'existe pas dans votre automate !")
+        rprint("L'état dont vous essayez de supprimer la liaison n'existe pas dans votre automate !")
     
     # On vérifie que le symbol à supprimer existe ou pas dans le langage de l'automate
     if symbol not in AEF["alphabet"]:
-        raise ValueError ("la liaison que vous souhaitez supprimer ne posséde pas ce symbol !")
+        print("la liaison que vous souhaitez supprimer ne posséde pas ce symbol !")
     
     # Il se peut que les états de départ et d'arrivée existent dans l'automate, ainsi que le symbol 
     # Il faut donc vérifier dans les liaisons si la liaison existe entre les 2 états, possédant le symbol choisi 
-    if from_state not in AEF["transitions"] or symbol not in AEF["transitions"][from_state] or AEF["transitions"][from_state][symbol] != to_state :
-        raise ValueError ("La liaison que vous voulez supprimer n'existe pas !")
+    if from_state not in AEF["transitions"] or symbol not in AEF["transitions"][from_state] :
+        print("La liaison que vous voulez supprimer n'existe pas !")
     
-    # Si on vérifie toutes les conditions du if, on peut alors supprimer le symbol de la liaison 
-    del AEF["transitions"][from_state][symbol]
+    to_value = AEF["transitions"][from_state][symbol]
 
-    # Si le symbol était rattaché à un état de départ, on supprime cette état des liaisons 
-    if not AEF["transitions"][from_state]:
-        del AEF["transitions"][from_state]      # pas besoin de supprimer l'état d'arrivée car en supprime le symbol qui est la clé de la valeur de cet état !
+    if isinstance(to_value, list):
+        if to_state in to_value :
+            to_value.remove(to_state)
+            if len(to_value) == 1 : 
+                AEF["transitions"][from_state][symbol] = to_value[0]
+        elif len(to_value) == 0 :
+            del AEF["transitions"][from_state][symbol]
+    elif to_value == to_state :
+        del AEF["transitions"][from_state][symbol]       # Si on vérifie toutes les conditions du if, on peut alors supprimer le symbol de la liaison 
+    if not AEF["transitions"][from_state]: # Si le symbol était rattaché à un état de départ, on supprime cette état des liaisons 
+        del AEF["transitions"][from_state] # pas besoin de supprimer l'état d'arrivée car en supprime le symbol qui est la clé de la valeur de cet état !
     
+
 
 
 def import_AEF(filename) :
@@ -350,7 +375,7 @@ def modify_AEF (AEF) :
     
         elif choice == "20" :
             answer = input ("Avant de quitter, voulez vous exporter votre AEF sur un fichier ?  :  ")
-            if answer == "1" :
+            if answer == "yes" :
                 export_AEF(AEF, "AEF_exported.txt")
             else :
                 break
