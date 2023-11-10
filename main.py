@@ -1,4 +1,3 @@
-
 def create_AEF():
     """"
     Cette fonction permet de créer un nouvel AEF grâce à la méthode set()
@@ -145,7 +144,7 @@ def remove_transition (AEF, from_state, to_state, symbol) :
     """
     # On vérifie que l'état de départ ou l'état d'arrivée de la liaison existe 
     if from_state not in AEF["states"] or to_state not in AEF["states"]:
-        rprint("L'état dont vous essayez de supprimer la liaison n'existe pas dans votre automate !")
+        print("L'état dont vous essayez de supprimer la liaison n'existe pas dans votre automate !")
     
     # On vérifie que le symbol à supprimer existe ou pas dans le langage de l'automate
     if symbol not in AEF["alphabet"]:
@@ -176,7 +175,7 @@ def remove_transition (AEF, from_state, to_state, symbol) :
 def import_AEF(filename) :
     """
     Cette fonction permet d'importer un AEF depuis un fichier enregistré dans le même dossier que ce projet (en local)
-    On ouvre le fichier en mode lecture, on vérifie qu'il contienne bien les clés du dictionnaire de l'AEF et on retrun AEF
+    On ouvre le fichier en mode lecture, on vérifie qu'il contienne bien les clés du dictionnaire de l'AEF et on return AEF
 
     """
     with open(filename, "r") as f:
@@ -284,6 +283,16 @@ def make_complete(AEF) :
                 # On pourra vérifier facilement avec la fonction is_complete si l'AEF est complet 
 
 
+def complementaire(AEF):
+    print ("AEF initial :",AEF)
+    temp = []
+    for  state in AEF["final_states"]:
+        temp.append(state)
+    AEF["final_states"] = set()
+    for state in AEF["states"]:
+        if state not in temp:
+                add_final_state(AEF,state)
+    return 0
 
 
 
@@ -334,6 +343,7 @@ def modify_AEF (AEF) :
         print ("9. Rendre un AEF complet")
         print ("10. Vérifier si votre AEF est déterministe")
         print ("11. Rendre votre AEF déterministe")
+        print ("12. Transformer votre AEF en son complémentaire")
         
         print ("20. Quitter")
         
@@ -369,7 +379,8 @@ def modify_AEF (AEF) :
             is_complete(AEF)
         elif choice == "9" :
             make_complete(AEF)
-        
+        elif choice == "12":
+            complementaire(AEF)
         # à finir ici !!!!!!!!!!!!!!!!!!!
 
     
@@ -416,7 +427,5 @@ def main() :
 
 
 
-
 if __name__ == "__main__" :
     main()
-
