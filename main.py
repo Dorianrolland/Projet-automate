@@ -51,7 +51,6 @@ def add_transition(AEF, from_state, to_state, symbol):
 
     # On récupère la liste des états d'arrivée pour le symbole
     destinations = AEF["transitions"][from_state].get(symbol, [])
-
     # On ajoute l'état d'arrivée à la liste
     destinations.append(to_state)
 
@@ -321,7 +320,8 @@ def make_complete(AEF):
 
 
 def complementaire(AEF):
-    print ("AEF initial :",AEF)
+    print ("AEF initial :")
+    print(AEF)
     temp = []
     for  state in AEF["final_states"]:
         temp.append(state)
@@ -329,9 +329,23 @@ def complementaire(AEF):
     for state in AEF["states"]:
         if state not in temp:
                 add_final_state(AEF,state)
-    return 0
+    return
 
+def miroir(AEF):
+    new_AEF = {}
+    for a in AEF:
+        new_AEF[a]=AEF[a]
+        new_AEF["transitions"] = {}
 
+    for start in AEF["transitions"]:
+        i = 0
+        for states in AEF["transitions"][start].values():
+            for value in states:
+                add_transition(new_AEF, value, start, list(AEF["transitions"][start].keys())[i])
+            i+=1
+    print('Miroir de votre AEF : ')
+    print(new_AEF)
+    return
 
 def firstchoice () :
     """
@@ -381,6 +395,7 @@ def modify_AEF (AEF) :
         print ("10. Vérifier si votre AEF est déterministe")
         print ("11. Rendre votre AEF déterministe")
         print ("12. Transformer votre AEF en son complémentaire")
+        print ("13. Afficher le miroir de votre AEF")
         
         print ("20. Quitter")
         
@@ -418,13 +433,16 @@ def modify_AEF (AEF) :
             make_complete(AEF)
         elif choice == "12":
             complementaire(AEF)
+        elif choice == "13":
+            miroir(AEF)
+            
     
 
         # à finir ici !!!!!!!!!!!!!!!!!!!
 
     
         elif choice == "20" :
-            answer = input ("Avant de quitter, voulez vous exporter votre AEF sur un fichier ?  :  ")
+            answer = input ("Avant de quitter, voulez vous exporter votre AEF sur un fichier ?  (yes/no):  ")
             if answer == "yes" :
                 export_AEF(AEF, "AEF_exported.txt")
             else :
