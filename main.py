@@ -379,15 +379,19 @@ def miroir(AEF):
         new_AEF[a]=AEF[a]
         new_AEF["transitions"] = {}
 
-    for start in AEF["transitions"]:
-        i = 0
-        for states in AEF["transitions"][start].values():
-            for value in states:
-                add_transition(new_AEF, value, start, list(AEF["transitions"][start].keys())[i])
-            i+=1
-    print('Miroir de votre AEF : ')
-    print(new_AEF)
-    return
+    if (len(AEF["final_states"])) != 1:
+        raise ValueError("Il faut que votre AEF n'ait qu'un état final")
+    
+    else:
+        for start in AEF["transitions"]:
+            i = 0
+            for states in AEF["transitions"][start].values():
+                for value in states:
+                    add_transition(new_AEF, value, start, list(AEF["transitions"][start].keys())[i])
+                i+=1
+        print('Miroir de votre AEF : ')
+        print(new_AEF)
+        return
 
 def firstchoice () :
     """
