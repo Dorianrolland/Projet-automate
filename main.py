@@ -319,6 +319,48 @@ def make_complete(AEF):
     return True
 
 
+
+def is_deterministic(AEF):
+    """
+    Cette fonction vérifie si un automate est déterministe.
+    """
+
+    # Vérifier s'il y a un état de départ, sinon demander à l'utilisateur d'en définir un
+    if AEF["start_state"] is None:
+        print("\nL'AEF n'a pas d'état de départ.")
+        state = input("Veuillez définir un état de départ : ")
+        set_start_state(AEF, state)
+    
+      # Vérifier s'il y a des états d'arrivée, sinon demander à l'utilisateur d'en définir au moins un
+    if not AEF["final_states"]:
+        print("\nL'AEF n'a pas d'état d'arrivée.")
+        state = input("Veuillez définir au moins un état d'arrivée : ")
+        add_final_state(AEF, state)
+
+    # Parcourir tous les états de l'automate
+    for state in AEF["states"]:
+        
+        # Vérifier si l'état a des transitions définies
+        if state in AEF["transitions"]:
+            
+            # Parcourir les symboles des transitions pour cet état
+            for symbol in AEF["transitions"][state]:
+                
+                # Vérifier si la valeur associée au symbole est une liste avec une taille supérieure à 1
+                if len(AEF["transitions"][state][symbol]) > 1:
+                    print(f"\nL'automate n'est pas déterministe. État {state} a plusieurs transitions pour le symbole {symbol}.")
+                    return False
+    
+    # Si aucune violation n'a été détectée, l'automate est déterministe
+    print("\nL'automate est déterministe.")
+    return True
+
+
+
+
+
+
+
 def complementaire(AEF):
     print ("AEF initial :")
     print(AEF)
@@ -431,6 +473,8 @@ def modify_AEF (AEF) :
             is_complete(AEF)
         elif choice == "9" :
             make_complete(AEF)
+        elif choice == "10" :
+            is_deterministic(AEF)
         elif choice == "12":
             complementaire(AEF)
         elif choice == "13":
