@@ -1,2 +1,2 @@
-{'states': {'B', 'C', 'A'}, 'alphabet': {'y', 'x'}, 'transitions': {'A': {'x': ['A'], 'y': ['B']}, 'B': {'x': ['C']}, 'C': {'y': ['B']}}, 'start_state': None, 'final_states': set()} 
+{'states': {'B', 'C', 'A', 'D'}, 'alphabet': {'y', 'x', 'z'}, 'transitions': {'A': {'x': ['A', 'D'], 'y': ['B']}, 'B': {'x': ['C']}, 'C': {'y': ['B']}}, 'start_state': 'A' , 'final_states': {'C'} } 
 
