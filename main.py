@@ -1,7 +1,5 @@
 
-import networkx as nx
-import matplotlib.pyplot as plt
-import pandas as pd 
+# Le main du script 
 
 
 from automate_creator import create_AEF
