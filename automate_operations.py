@@ -3,26 +3,31 @@
 # Toutes les fonctions d'opérations et vérifications sur les automates (rendre complet, déterministe, miroir...)
 
 
-from automate_util import add_state, add_final_state, add_transition, set_start_state
+from automate_util import add_state, add_final_state, add_transition, set_start_state, remove_state, remove_transition
 
 
 
-def verifword(AEF):
-    """
-    Cette fonction permet de vérifier si l'automate reconnaît un mot grâce à son langage
-    """
 
-    # Vérifier s'il y a un état de départ, sinon demander à l'utilisateur d'en définir un
+def verification_AEF(AEF):
+
+     # Vérifier s'il y a un état de départ, sinon demander à l'utilisateur d'en définir un
     if AEF["start_state"] is None:
         print("\nL'AEF n'a pas d'état de départ.")
         state = input("Veuillez définir un état de départ : ")
         set_start_state(AEF, state)
 
     # Vérifier s'il y a des états d'arrivée, sinon demander à l'utilisateur d'en définir au moins un
-    if not AEF["final_states"]:
+    if not AEF["final_states"] or AEF["final_states"] == set():
         print("\nL'AEF n'a pas d'état d'arrivée.")
         state = input("Veuillez définir au moins un état d'arrivée : ")
-        add_final_state(AEF, state)
+        add_final_state(AEF, state)    
+
+
+def verifword(AEF):
+    """
+    Cette fonction permet de vérifier si l'automate reconnaît un mot grâce à son langage
+    """
+    verification_AEF(AEF)
 
     # Demander à l'utilisateur de donner le mot qu'il souhaite vérifier
     answer = input("\nÉcrivez votre mot : ")
@@ -66,6 +71,8 @@ def is_complete(AEF):
     """
     Cette fonction vérifie si l'automate est complet ou pas
     """
+
+    verification_AEF(AEF)
 
     # On récupère l'alphabet de l'automate
     alphabet = AEF["alphabet"]
@@ -130,17 +137,7 @@ def is_deterministic(AEF):
     Cette fonction vérifie si un automate est déterministe.
     """
 
-    # Vérifier s'il y a un état de départ, sinon demander à l'utilisateur d'en définir un
-    if AEF["start_state"] is None:
-        print("\nL'AEF n'a pas d'état de départ.")
-        state = input("Veuillez définir un état de départ : ")
-        set_start_state(AEF, state)
-    
-      # Vérifier s'il y a des états d'arrivée, sinon demander à l'utilisateur d'en définir au moins un
-    if not AEF["final_states"]:
-        print("\nL'AEF n'a pas d'état d'arrivée.")
-        state = input("Veuillez définir au moins un état d'arrivée : ")
-        add_final_state(AEF, state)
+    verification_AEF(AEF)
 
     # Parcourir tous les états de l'automate
     for state in AEF["states"]:
@@ -200,3 +197,88 @@ def miroir(AEF):
         print('Miroir de votre AEF : ')
         print(new_AEF)
         return
+
+
+
+
+def reachable_states(AEF):
+    # Initialiser un ensemble pour stocker les états accessibles 
+    reachable = set()
+    # Initialiser une liste pour stocker les états à visiter 
+    to_visit = [AEF["start_state"]]
+
+    # Parcourir les états à visiter 
+    while to_visit:
+        state = to_visit.pop()
+        if state not in reachable :
+            reachable.add(state)
+            if state in AEF["transitions"] :
+                for symbol in AEF["transitions"][state]:
+                    to_visit.extend(AEF["transitions"][state][symbol])
+
+    return reachable
+
+
+def coaccess_states(AEF):
+    # Initialiser un ensemble pour stocker les états coaccessibles 
+    coaccessible = set (AEF["final_states"])
+    # Initialiser une liste pour stocker les états à visiter 
+    to_visit = list (AEF["final_states"])
+
+    # Parcourir kes états à visiter 
+    while to_visit:
+        state = to_visit.pop()
+        for from_state in AEF["transitions"]:
+            for symbol in AEF["transitions"][from_state]:
+                if state in AEF["transitions"][from_state][symbol] and from_state not in coaccessible :
+                    coaccessible.add(from_state)
+                    to_visit.append(from_state)
+    
+    return coaccessible
+
+
+
+
+def trimmed_AEFv2(AEF):
+
+    """Cette fonction permet d'émonder un automate en récupérant les états inutiles 
+        et les supprimants grâce aux fonctions de base d'un automate"""
+    
+    # Verification des paramètres de l'automate 
+    verification_AEF(AEF)
+
+    print("Automate avant émondage : \n")
+    print(AEF)
+
+    # Obtenir les états accessibles et coaccessibles
+    reachable = reachable_states(AEF)
+    print("Etats accessibles : ")
+    print(reachable)
+
+    coaccessible = coaccess_states(AEF)
+    print("Etats coaccessibles : ")
+    print(coaccessible)
+
+    # Obtenir les états utiles en calculant l'intersection des ensembles accessibles et coaccessibles
+    useful_states = reachable.intersection(coaccessible)
+    print("Etats utiles : ")
+    print(useful_states)
+
+    # Vérifier si l'automate est émondable ou pas 
+    if AEF["states"] == useful_states:
+        print ("\nVotre automate ne peut pas être émondé, tous les états sont utiles")
+        return AEF
+
+    # Supprimer les états inutiles
+    for state in set(AEF["states"]) - useful_states:
+        remove_state(AEF, state)
+
+    # Supprimer les transitions inutiles
+    for from_state in AEF["transitions"]:
+        for symbol in AEF["transitions"][from_state]:
+            to_states = AEF["transitions"][from_state][symbol]
+            for to_state in set(to_states) - useful_states:
+                remove_transition(AEF, from_state, to_state, symbol)
+
+    print("\nVotre automate a été émondé avec succès ! ")
+    return AEF

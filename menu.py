@@ -2,11 +2,11 @@
 
 # Fonctions du menu sur le terminal 
 
-from automate_operations import verifword, is_complete, is_deterministic, make_complete, complementaire, miroir
+from automate_operations import verifword, is_complete, is_deterministic, make_complete, complementaire, miroir, trimmed_AEFv2
 from file_operations import export_AEF
 from automate_util import add_final_state, add_state, add_transition, remove_state, remove_transition, set_start_state
-
-
+from database import init_database, insert_AEF
+from automate_display import display_AEF
 
 def firstchoice () :
     """
@@ -48,7 +48,12 @@ def modify_AEF (AEF) :
         print ("12. Transformer votre AEF en son complémentaire")
         print ("13. Afficher le miroir de votre AEF")
         
-        print ("20. Quitter")
+
+
+        print("22. Emonder votre automate")
+        print("23. Afficher le schèma de votre automate")
+        print("24. Ajouter votre AEF à la base de données")
+        print ("25. Quitter")
         
         # On initialise une variable grâce à la méthode input(), qui prendra la valeur de la réponse de l'utilisateur 
         choice = input ("\nEntrez votre choix : ")
@@ -92,12 +97,26 @@ def modify_AEF (AEF) :
 
         # à finir ici !!!!!!!!!!!!!!!!!!!
 
-    
-        elif choice == "20" :
-            answer = input ("Avant de quitter, voulez vous exporter votre AEF sur un fichier ?  :  ")
-            if answer == "yes" :
-                export_AEF(AEF, "AEF_exported.txt")
-            else :
-                break
+        
+        elif choice == "22": 
+            trimmed_AEFv2(AEF)
+        elif choice =="23":
+            display_AEF(AEF)
+        elif choice == "24":
+            print("\nAEF ajouté à la base de données !")
+            conn = init_database()
+            insert_AEF(conn, AEF)
+        elif choice == "25" :
+            while True :
+                answer = input ("Avant de quitter, voulez vous exporter votre AEF sur un fichier ?  :  ")
+                if answer == "yes" :
+                    export_AEF(AEF, "AEF_exported.txt")
+                    break
+                elif answer =="no":
+                    print ("Vous quittez le programme")
+                    break
+                else :
+                    print ("\nChoix invalide. Veuillez répondre avec yes ou no")
+            break
         else :
             print ("Choix invalide !!!")
