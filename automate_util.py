@@ -43,13 +43,14 @@ def add_transition(AEF, from_state, to_state, symbol):
     # On récupère la liste des états d'arrivée pour le symbole
     destinations = AEF["transitions"][from_state].get(symbol, [])
 
-    # On ajoute l'état d'arrivée à la liste
-    destinations.append(to_state)
-
+    # On ajoute l'état d'arrivée à la liste, en vérifiant que ce dernier n'y est pas déjà
+    if to_state not in AEF["transitions"][from_state][symbol] :
+        destinations.append(to_state)
+        print(f"\nTransition ajoutée : {from_state} --({symbol})--> {to_state}")
     # On met à jour la liste des états d'arrivée pour le symbole
     AEF["transitions"][from_state][symbol] = destinations
 
-    print(f"\nTransition ajoutée : {from_state} --({symbol})--> {to_state}")
+    print(f"\nTransition non ajoutée. Elle existe déjà ! ")
 
 
 def set_start_state (AEF, state): 
