@@ -2,6 +2,8 @@
 
 # Fonctions du menu sur le terminal 
 
+from collections import deque
+import sys
 from automate_operations import verifword, is_complete, is_deterministic, make_complete, complementaire, miroir, trimmed_AEFv2
 from file_operations import export_AEF
 from automate_util import add_final_state, add_state, add_transition, remove_state, remove_transition, set_start_state
@@ -21,6 +23,45 @@ def firstchoice () :
     print ("5. Rien faire, vous aimez pas trop les automates\n ")
     choice = input("Entrez votre choix : ")
     return choice 
+
+
+
+def AEF_langage(AEF):
+    
+    # Initialiser l'ensemble des langages
+    langages = set()
+
+    # Utiliser une file pour simuler une file d'états à explorer (BFS)
+    queue = deque([(AEF["start_state"], [], set())])
+
+    while queue:
+        current_state, current_path, visited_states = queue.popleft()
+
+        # Ajouter l'état actuel aux états visités si celui ci n'y est pas 
+        visited_states.add(current_state)
+
+        # Si l'état actuel est final, ajouter le chemin à la liste des langages
+        if current_state in AEF["final_states"]:
+            langages.add(" ".join(current_path))
+
+        # Explorer les transitions depuis l'état actuel
+        if current_state in AEF["transitions"]:
+            for symbol in AEF["transitions"][current_state]:
+                for next_state in AEF["transitions"][current_state][symbol]:
+                    # Gérer la boucle infinie (afficher x* pour indiquer une boucle infinie)
+                    if next_state in visited_states or next_state == current_state:
+                        queue.append((next_state, current_path + [f"{symbol}*"], visited_states))
+                    else:
+                        queue.append((next_state, current_path + [f"{symbol}*{next_state}"], visited_states.copy()))
+
+    # Afficher le langage reconnu par l'automate
+    print(f"Le langage reconnu par cet automate est : {{{' '.join(langages)}}}")
+
+
+
+
+
+
 
 
 
@@ -49,10 +90,10 @@ def modify_AEF (AEF) :
         print ("13. Afficher le miroir de votre AEF")
         
 
-
-        print("22. Emonder votre automate")
-        print("23. Afficher le schèma de votre automate")
-        print("24. Ajouter votre AEF à la base de données")
+        print ("17. Afficher le langage reconnu par votre AEF")
+        print ("22. Emonder votre automate")
+        print ("23. Afficher le schèma de votre automate")
+        print ("24. Ajouter votre AEF à la base de données")
         print ("25. Quitter")
         
         # On initialise une variable grâce à la méthode input(), qui prendra la valeur de la réponse de l'utilisateur 
@@ -96,7 +137,10 @@ def modify_AEF (AEF) :
     
 
         # à finir ici !!!!!!!!!!!!!!!!!!!
-
+        elif choice == "17" :
+            # Augmenter la limite de récursion
+            sys.setrecursionlimit(10000)
+            AEF_langage(AEF)
         
         elif choice == "22": 
             trimmed_AEFv2(AEF)

@@ -7,6 +7,7 @@ from file_operations import import_AEF, export_AEF
 from menu import firstchoice, modify_AEF
 
 
+
 def main() :
     """
     Cette fonction est le main du projet, permettant d'utiliser toutes les fonctionalités et gérer un automate 

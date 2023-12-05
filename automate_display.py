@@ -47,6 +47,7 @@ def display_AEF(AEF) :
     for state in AEF["final_states"] : 
         nx.draw_networkx_nodes(G, pos, nodelist= [state], node_size=3000, node_color = 'lightblue', node_shape ='o', edgecolors='black', linewidths=5 )
     
+    # Marquer l'état initial par un cercle vert 
     nx.draw_networkx_nodes(G, pos, nodelist= [AEF["start_state"]], node_size=3000, node_color = 'lightgreen')
-
+    
     plt.show()

@@ -23,7 +23,7 @@ def add_transition(AEF, from_state, to_state, symbol):
     Cette fonction permet d'ajouter une liaison entre 2 états
     from_state représente l'état de départ 
     to_state représente l'état d'arrivée
-    symbol représente le symbol de la liaison
+    symbol représente le symbole de la liaison
     """
 
     # Tout d'abord, on vérifie que l'état "from_state" ou "to_state" est bien présent dans l'automate
@@ -36,22 +36,27 @@ def add_transition(AEF, from_state, to_state, symbol):
         # On ajoute le symbole s'il n'existe pas
         AEF["alphabet"].add(symbol)
 
-    # Si l'état de départ n'existe pas dans AEF["transitions"], on lui crée un dictionnaire vide
-    if from_state not in AEF["transitions"]:
-        AEF["transitions"][from_state] = {}
+    # Ajout de l'état de départ dans les transitions s'il n'existe pas encore
+    AEF["transitions"].setdefault(from_state, {})
 
     # On récupère la liste des états d'arrivée pour le symbole
     destinations = AEF["transitions"][from_state].get(symbol, [])
 
     # On ajoute l'état d'arrivée à la liste, en vérifiant que ce dernier n'y est pas déjà
-    if to_state not in AEF["transitions"][from_state][symbol] :
-        destinations.append(to_state)
+    if symbol in AEF["transitions"][from_state]:
+        if to_state not in AEF["transitions"][from_state][symbol]:
+            destinations.append(to_state)
+            print(f"\nTransition ajoutée : {from_state} --({symbol})--> {to_state}")
+        else:
+            print(f"\nTransition non ajoutée. Elle existe déjà ! ")
+    else:
+        # Initialisez la liste des destinations pour le symbole s'il n'existe pas encore
+        AEF["transitions"][from_state][symbol] = [to_state]
         print(f"\nTransition ajoutée : {from_state} --({symbol})--> {to_state}")
-    else :
-        print(f"\nTransition non ajoutée. Elle existe déjà ! ")
-        
-    # On met à jour la liste des états d'arrivée pour le symbole
-    AEF["transitions"][from_state][symbol] = destinations
+
+    # Retourne la liste des destinations mises à jour pour le symbole
+    return destinations
+
 
 
 
