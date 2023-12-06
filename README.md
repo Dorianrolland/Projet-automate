@@ -1,13 +1,13 @@
 # Projet-automate
 
-This will help you getting closer to our FSA algo
+This will help you understand our FSA algo
 
 
-# Before lunching the script, you will need to make some installation or updates
-# In terminal, tap this :
-pip install -r requirement.txt                 (Make sur to have the lastest pip version)
+# Before running the script, you will need to proceed to a few installation and/or updates
+
+# In your terminal, enter :
+pip install -r requirement.txt                 (Make sure to have the latest pip version)
 
 
 
-So, when you will start our algo, you will see this : 
-
+So, when you will run our algo, you will see :
