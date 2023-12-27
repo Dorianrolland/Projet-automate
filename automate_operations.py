@@ -3,8 +3,8 @@
 # Toutes les fonctions d'opérations et vérifications sur les automates (rendre complet, déterministe, miroir...)
 
 
-from automate_util import add_state, add_final_state, add_transition, set_start_state, remove_state, remove_transition
-
+from automate_util import add_state, add_final_state, add_transition, set_start_state, remove_state, remove_transition, str_to_state, state_to_str
+from automate_creator import create_AEF
 
 
 
@@ -156,6 +156,46 @@ def is_deterministic(AEF):
     # Si aucune violation n'a été détectée, l'automate est déterministe
     print("\nL'automate est déterministe.")
     return True
+
+
+def determinize_AEF(AEF) : 
+    # On crée un AEF vide 
+    det_AEF = create_AEF()
+    # Transformation de l'état initial en string 
+    start_state_str = state_to_str(AEF["start_state"])
+    to_process = [start_state_str]
+
+    while to_process: 
+        current_state_str = to_process.pop()
+        current_state = str_to_state(current_state_str)
+        det_AEF["states"].add(current_state_str)
+        
+        if any(s in AEF["final_states"] for s in current_state) : 
+            det_AEF["final_states"].add(current_state_str)
+        
+        for symbol in AEF["alphabet"]:
+            next_states = set()
+        
+            for state in current_state : 
+                if state in AEF["transitions"] and symbol in AEF["transitions"][state]:
+                    next_states.update(AEF["transitions"][state][symbol])
+            
+            if next_states : 
+                next_states_str = state_to_str(next_states)
+
+                if next_states_str not in det_AEF["states"] :
+                    to_process.append(next_states_str)
+
+                if current_state_str not in det_AEF["transitions"] : 
+                    det_AEF["transitions"][current_state_str] = {}
+
+                det_AEF["transitions"][current_state_str][symbol] = [next_states_str]
+    
+    det_AEF["start_state"] = start_state_str
+    det_AEF["alphabet"] = AEF["alphabet"].copy()
+
+    AEF = det_AEF
+    return AEF
 
 
 

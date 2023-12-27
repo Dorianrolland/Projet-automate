@@ -4,7 +4,7 @@
 
 from collections import deque
 import sys
-from automate_operations import verifword, is_complete, is_deterministic, make_complete, complementaire, miroir, trimmed_AEFv2
+from automate_operations import verifword, is_complete, is_deterministic, make_complete, complementaire, miroir, trimmed_AEFv2, determinize_AEF
 from file_operations import export_AEF
 from automate_util import add_final_state, add_state, add_transition, remove_state, remove_transition, set_start_state
 from database import init_database, insert_AEF
@@ -130,6 +130,9 @@ def modify_AEF (AEF) :
             make_complete(AEF)
         elif choice == "10" :
             is_deterministic(AEF)
+        elif choice == "11": 
+            AEF = determinize_AEF(AEF)
+            print ("Voici votre AEF déterministe : ")
         elif choice == "12":
             complementaire(AEF)
         elif choice == "13":

@@ -175,3 +175,13 @@ def remove_transition(AEF, from_state, to_state, symbol):
         del AEF["transitions"][from_state]
 
     print(f"\nLiaison supprimée : {from_state} --({symbol})--> {to_state}")
+
+
+
+def state_to_str(state_set) : 
+        return ''.join(sorted(state_set))
+    
+
+
+def str_to_state(state_str) : 
+        return set(state_str)
