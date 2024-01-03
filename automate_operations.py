@@ -1,11 +1,11 @@
- 
+import pandas as pd
 
 # Toutes les fonctions d'opérations et vérifications sur les automates (rendre complet, déterministe, miroir...)
 
 
 from automate_util import add_state, add_final_state, add_transition, set_start_state, remove_state, remove_transition, str_to_state, state_to_str
 from automate_creator import create_AEF
-
+from Add_AEF2 import add_AEF
 
 
 def verification_AEF(AEF):
@@ -158,122 +158,143 @@ def is_deterministic(AEF):
     return True
 
 
-def determinize_AEF(AEF) : 
-    # On crée un AEF vide 
+def determinize_AEF(AEF):
+    """ Fonction pour rendre un automate déterministe """
+
+    # On crée un AEF vide
     det_AEF = create_AEF()
-    # Transformation de l'état initial en string 
+    # Transformation de l'état initial en string
     start_state_str = state_to_str(AEF["start_state"])
     to_process = [start_state_str]
 
-    while to_process: 
+    while to_process:
+        # Retirer un état de la file à traiter
         current_state_str = to_process.pop()
         current_state = str_to_state(current_state_str)
         det_AEF["states"].add(current_state_str)
-        
-        if any(s in AEF["final_states"] for s in current_state) : 
+
+        # Vérifier si l'un des états actuels est un état final
+        if any(s in AEF["final_states"] for s in current_state):
             det_AEF["final_states"].add(current_state_str)
-        
+
+        # Parcourir les symboles de l'alphabet
         for symbol in AEF["alphabet"]:
             next_states = set()
-        
-            for state in current_state : 
+
+            # Pour chaque état actuel, trouver les états suivants avec le symbole actuel
+            for state in current_state:
                 if state in AEF["transitions"] and symbol in AEF["transitions"][state]:
                     next_states.update(AEF["transitions"][state][symbol])
-            
-            if next_states : 
+
+            # S'il y a des états suivants
+            if next_states:
                 next_states_str = state_to_str(next_states)
 
-                if next_states_str not in det_AEF["states"] :
+                # Ajouter les états suivants à la file à traiter s'ils ne sont pas déjà présents
+                if next_states_str not in det_AEF["states"]:
                     to_process.append(next_states_str)
 
-                if current_state_str not in det_AEF["transitions"] : 
+                # Créer ou mettre à jour les transitions dans l'AEF déterministe
+                if current_state_str not in det_AEF["transitions"]:
                     det_AEF["transitions"][current_state_str] = {}
 
                 det_AEF["transitions"][current_state_str][symbol] = [next_states_str]
-    
+
+    # Définir l'état initial de l'AEF déterministe et copier l'alphabet
     det_AEF["start_state"] = start_state_str
     det_AEF["alphabet"] = AEF["alphabet"].copy()
 
+    # Mettre à jour l'AEF d'origine avec l'AEF déterministe
     AEF = det_AEF
     return AEF
 
 
-
-
 def complementaire(AEF):
-    print ("AEF initial :",AEF)
+    # Afficher l'AEF initial
+    print("AEF initial :", AEF)
+    
+    # Copier les états finaux dans une liste temporaire
     temp = []
-    for  state in AEF["final_states"]:
+    for state in AEF["final_states"]:
         temp.append(state)
+    
+    # Remplacer les états finaux par le complément de l'ensemble des états
     AEF["final_states"] = set()
     for state in AEF["states"]:
         if state not in temp:
-                add_final_state(AEF,state)
+            add_final_state(AEF, state)
+    
     return 0
 
 
-
 def miroir(AEF):
+    # Créer un nouvel AEF
     new_AEF = {}
-    for a in AEF:
-        new_AEF[a]=AEF[a]
-        new_AEF["transitions"] = {}
-        new_AEF["final_states"] = {}
-
-    for a in AEF["final_states"]:
-        set_start_state (new_AEF, a)  
     
-    new_AEF["final_states"]= {AEF["start_state"]}
+    # Copier les propriétés de l'AEF original dans le nouvel AEF
+    for a in AEF:
+        new_AEF[a] = AEF[a]
+    new_AEF["transitions"] = {}
+    new_AEF["final_states"] = {}
 
-    if (len(AEF["final_states"])) != 1:
+    # Définir les états finaux du nouvel AEF comme l'état initial de l'AEF original
+    for a in AEF["final_states"]:
+        set_start_state(new_AEF, a)
+
+    new_AEF["final_states"] = {AEF["start_state"]}
+
+    # Vérifier s'il y a exactement un état final dans l'AEF original
+    if len(AEF["final_states"]) != 1:
         raise ValueError("Il faut que votre AEF n'ait qu'un état final")
     else:
+        # Copier les transitions en inversant les états
         for start in AEF["transitions"]:
             i = 0
             for states in AEF["transitions"][start].values():
                 for value in states:
                     add_transition(new_AEF, value, start, list(AEF["transitions"][start].keys())[i])
-                i+=1
+                i += 1
+        
+        # Afficher le miroir de l'AEF
         print('Miroir de votre AEF : ')
         print(new_AEF)
         return
 
 
-
-
 def reachable_states(AEF):
-    # Initialiser un ensemble pour stocker les états accessibles 
+    # Initialiser un ensemble pour stocker les états accessibles
     reachable = set()
-    # Initialiser une liste pour stocker les états à visiter 
+    # Initialiser une liste pour stocker les états à visiter
     to_visit = [AEF["start_state"]]
 
-    # Parcourir les états à visiter 
+    # Parcourir les états à visiter
     while to_visit:
         state = to_visit.pop()
-        if state not in reachable :
+        if state not in reachable:
             reachable.add(state)
-            if state in AEF["transitions"] :
+            if state in AEF["transitions"]:
                 for symbol in AEF["transitions"][state]:
                     to_visit.extend(AEF["transitions"][state][symbol])
 
     return reachable
 
 
-def coaccess_states(AEF):
-    # Initialiser un ensemble pour stocker les états coaccessibles 
-    coaccessible = set (AEF["final_states"])
-    # Initialiser une liste pour stocker les états à visiter 
-    to_visit = list (AEF["final_states"])
 
-    # Parcourir kes états à visiter 
+def coaccess_states(AEF):
+    # Initialiser un ensemble pour stocker les états coaccessibles
+    coaccessible = set(AEF["final_states"])
+    # Initialiser une liste pour stocker les états à visiter
+    to_visit = list(AEF["final_states"])
+
+    # Parcourir les états à visiter
     while to_visit:
         state = to_visit.pop()
         for from_state in AEF["transitions"]:
             for symbol in AEF["transitions"][from_state]:
-                if state in AEF["transitions"][from_state][symbol] and from_state not in coaccessible :
+                if state in AEF["transitions"][from_state][symbol] and from_state not in coaccessible:
                     coaccessible.add(from_state)
                     to_visit.append(from_state)
-    
+
     return coaccessible
 
 
@@ -322,3 +343,129 @@ def trimmed_AEFv2(AEF):
 
     print("\nVotre automate a été émondé avec succès ! ")
     return AEF
+
+
+
+
+
+def find_paths(AEF, df):
+    """ Fonction pour retrouver tous les chemins possibles dans un automate """
+
+    def check_final_states_transitions(AEF, df) : 
+        """ Cette fonction permet de collécter les symboles des transitions des états finaux d'un automate et de les ajouter au chemin """
+        final_states = AEF["final_states"]
+        self_transitions = []
+
+        for final_state in final_states : 
+            transitions = df [(df["from_state"]== final_state) & (df["to_state"]== final_state)]
+            if not transitions.empty : 
+                symbols = transitions["symbol"].tolist()
+                concatenated_symbols = '(' + '|'.join([f"{symbol}" for symbol in symbols] ) + ')*'
+                self_transitions.append((final_state, concatenated_symbols))
+        
+        return self_transitions
+
+    # création d'une liste pour stocker les chemins traversés
+    paths = []
+    # Pile pour effectuer une recherche en profondeur
+    stack = [([ ], AEF["start_state"])]
+    # Ensemble pour stocker les états déjà visités
+    visited = set()
+
+    self_transitions = check_final_states_transitions(AEF, df)
+    while stack:
+        # Retirer le chemin et l'état actuel de la pile
+        path, state = stack.pop()
+
+        # Vérifier si l'état actuel est un état final
+        if state in AEF["final_states"]:
+            if state in dict(self_transitions):
+                # Ajouter les symboles de liaisons bouclés de l'état si il est final 
+                path.append(dict(self_transitions)[state])
+            # Ajouter le chemin à la liste des chemins
+            paths.append(path)
+        else:
+            # Marquer l'état comme visité
+            visited.add(state)
+            # Filtrer les transitions depuis l'état actuel
+            transitions = df[df["from_state"] == state ]
+            # Regrouper les transitions par état de départ et d'arrivée, puis concaténer les symboles avec '|'
+            grouped_transitions = transitions.groupby( ["from_state", "to_state"]) ["symbol"].apply(lambda x: '(' + '|'.join(x) + ')').reset_index()
+            # Parcourir les transitions regroupées
+            for _, transition in grouped_transitions.iterrows() :
+                symbol = transition["symbol"]
+                next_state = transition["to_state"]
+                # Vérifier si l'état suivant n'a pas été visité
+                if next_state not in visited : 
+                    # Ajouter le chemin avec le symbole et passer à l'état suivant
+                    stack.append((path + [symbol], next_state)) 
+                # Sinon, si l'état suivant est le même que l'état actuel
+                elif state == next_state:
+                    # Ajouter le symbole avec '*' au chemin (auto-transition)
+                    path.append(symbol + "*")
+                      
+    # Retourner la liste des chemins traversés
+    return paths
+
+
+
+def join_language(paths):
+    return ' U '.join(' + '.join(path) for path in paths)
+
+def join_regex(paths) : 
+    return ' + '.join(' + '.join(path) for path in paths)
+
+
+
+# Fonction pour créer un DataFrame à partir de la structure d'un automate
+def df_from_AEF(AEF):
+    data = []
+    for state, transitions in AEF["transitions"].items():
+        for symbol, next_states in transitions.items():
+            for next_state in next_states:
+                data.append([state, symbol, next_state])
+    return pd.DataFrame(data, columns=["from_state", "symbol", "to_state"])
+
+
+
+def regex(AEF) : 
+    df = df_from_AEF(AEF)
+    # Obtenir la liste des chemins traversés dans l'AEF
+    paths = find_paths(AEF, df)
+    # Obtenir l'expression régulière en regroupant les chemins
+    exp = join_regex(paths)
+    # Afficher l'expression régulière
+    print(f"Voici l'expression réfulière de votre AEF : {exp}")
+
+
+def language(AEF):
+    df= df_from_AEF(AEF)
+    # Obtenir la liste des chemins traversés dans l'AEF
+    paths = find_paths(AEF, df)
+    # Obtenir le langage en regroupant les chemins
+    language = join_language(paths)
+    # Afficher le langage
+    print(f'Voici le langage reconnu par votre AEF : {language}')
+
+
+
+
+def are_automata_equivalent(AEF):
+    """ Fonction qui permet de renvoyé si 2 AEF sont équivalents """
+
+    # Ajout du deuxième automate 
+    AEF2 = add_AEF()
+    # Obtenir les chemins pour les deux automates
+    paths_AEF1 = find_paths(AEF, df_from_AEF(AEF))
+    paths_AEF2 = find_paths(AEF2, df_from_AEF(AEF2))
+
+    # Vérifier si les langages sont équivalents en prenant en compte l'ordre entre les "+"
+    language_AEF1 = join_language(paths_AEF1)
+    language_AEF2 = join_language(paths_AEF2)
+    print (f"\n\nVoici l'AEF que vous avez choisi comme 2éme AEF. Celui ci ne sera pas modifiable : \n{AEF2}")
+    print (f"\nVoici le langage de votre AEF : {language_AEF1}")
+    print (f"\nVoici le langage du 2éme AEF : {language_AEF2}")
+    if language_AEF1 == language_AEF2 : 
+        print ("\nLes 2 AEF sont équivalents !")
+    else : 
+        print("\nLes 2 AEF ne sont pas équivalents !")

@@ -15,7 +15,7 @@ def main() :
     """
     # On initialise l'AEF à un dictionnaire vide 
     AEF = {}
-
+    
     # On utilise la fonction firstchoice() pour avoir la première réponse de l'utilisateur. On l'utilise qu'une fois lorsqu'on lance un
     answer = firstchoice()
 
@@ -26,7 +26,7 @@ def main() :
     elif answer == "2" : 
         AEF = import_AEF("AEF.txt")
     elif answer == "3" : 
-        AEF = import_AEF("AEF.txt")
+        AEF = import_AEF("AEF_exported.txt")
         modify_AEF(AEF)
     elif answer == "4" :
         AEF = input ("Ecrivez l'AEF que vous souhaitez exporter :  ")

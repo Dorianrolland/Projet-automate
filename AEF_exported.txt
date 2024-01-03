@@ -1,1 +1,1 @@
-{'states': {'A', 'C', 'B'}, 'alphabet': {'x', 'z', 'y'}, 'transitions': {'A': {'x': ['A'], 'y': ['B'], 'z': ['C']}}, 'start_state': 'A', 'final_states': {'C', 'B'}}
+{'states': {'D', 'A', 'C', 'B'}, 'alphabet': {'y', 'z', 'x'}, 'transitions': {'A': {'x': ['A'], 'y': ['B']}, 'B': {'z': ['C', 'D']}, 'C': {'x': ['D']}}, 'start_state': 'A', 'final_states': {'D'}}
