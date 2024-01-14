@@ -227,6 +227,72 @@ def complementaire(AEF):
     return 0
 
 
+# Cette fonction permet de récuperer tous les états accessibles à partir d'un état donné avec un symbol donné 
+def next_states(AEF, state, symbol): 
+    states = set()
+    if state in AEF["transitions"]:
+        if symbol in AEF["transitions"][state]: 
+            states.update(AEF["transitions"][state][symbol])
+    return states
+
+
+# Cette fonction permet de récuperer tous les états accessibles à partir d'un ensemble d'états donné avec un symbole donné 
+def next_states_set(AEF, states, symbol): 
+    next_states_set = set()
+    for state in states :
+        next_states_set.update(next_states(AEF, state, symbol))
+    return next_states_set
+
+# Cette fonction permet de créer l'ensemble des transitions possibles à partir d'un ensemble d'états donné 
+def create_transition_set(AEF, states):
+    transition_set = {}
+    for symbol in AEF["alphabet"]:
+        next_states = next_states_set(AEF, states, symbol)
+        if next_states : 
+            transition_set[symbol] = list(next_states)
+    return transition_set
+
+
+# Cette fonction donne le produit de 2 AEF 
+def produit_AEF(AEF, AEF2):
+    # Création d'un nouvel automate fini 
+    new_AEF = create_AEF()
+    # On combine les alphabets des 2 AEF 
+    new_AEF["alphabet"] = AEF["alphabet"] | AEF2["alphabet"]
+
+    # Création des états et de leurs transitions grâces aux fonctions contruites auparavant 
+    for state1 in AEF["states"]: 
+        for state2 in AEF2["states"] : 
+            # Creation de l'état dans le produit 
+            new_state = state1 + state2
+            new_AEF["states"].add(new_state)
+
+            # Un état du produit est final uniquement si les deux correspondants de AEF et AEF2 sont finaux
+            if state1 in AEF["final_states"] and state2 in AEF2["final_states"]:
+                new_AEF["final_states"].add(new_state)
+            
+            # La meme chose mais pour l'état initial 
+            if (AEF["start_state"] == state1) and (AEF2["start_state"] == state2) : 
+                new_AEF["start_state"] = new_state
+            
+            # Creation des transitions 
+            transition_set_A = create_transition_set(AEF, {state1})
+            transition_set_B = create_transition_set( AEF2, {state2})
+            transition_set = {}
+            for symbol in new_AEF["alphabet"]:
+                next_states_A = next_states_set(AEF, {state1}, symbol)
+                next_states_B = next_states_set(AEF2, {state2}, symbol)
+                if next_states_A and next_states_B : 
+                    transition_set[symbol] = [next_state_A + next_state_B for next_state_A in next_states_A for next_state_B in next_states_B]
+            if transition_set :
+                new_AEF["transitions"][new_state] = transition_set
+    
+    print ("\nLe produit de vos 2 AEF est : \n", new_AEF)
+
+    return new_AEF
+
+
+
 def miroir(AEF):
     # Créer un nouvel AEF
     new_AEF = {}
