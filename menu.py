@@ -50,6 +50,7 @@ def modify_AEF (AEF) :
         print ("12. Transformer votre AEF en son complémentaire")
         print ("13. Afficher le miroir de votre AEF")
         print ("14. Afficher la concaténation de deux AEF")
+        print ("15. Afficher le produit de deux AEF")
         print ("16. Afficher l'expression régulière de votre AEF")
         print ("17. Afficher le langage reconnu par votre AEF")
         print ("18. Vérifier si deux AEF sont équivalents")
@@ -101,6 +102,9 @@ def modify_AEF (AEF) :
             miroir(AEF)
         elif choice == "14":
             concat(AEF)
+        elif choice == "15" : 
+            AEF2 = add_AEF()
+            produit_AEF(AEF, AEF2)
         elif choice == "16" : 
             regex(AEF)
         elif choice == "17" :
