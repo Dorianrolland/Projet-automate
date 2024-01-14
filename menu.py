@@ -4,7 +4,7 @@
 
 from collections import deque
 from Add_AEF2 import add_AEF
-from automate_operations import verifword, is_complete, is_deterministic, make_complete, complementaire, miroir, trimmed_AEFv2, determinize_AEF, concat, language, regex, are_automata_equivalent
+from automate_operations import verifword, is_complete, is_deterministic, make_complete, complementaire, miroir, trimmed_AEFv2, determinize_AEF, concat, language, regex, are_automata_equivalent, produit_AEF
 from file_operations import export_AEF
 from automate_util import add_final_state, add_state, add_transition, remove_state, remove_transition, set_start_state
 from database import init_database, insert_AEF
