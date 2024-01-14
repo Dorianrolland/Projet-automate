@@ -121,7 +121,7 @@ def modify_AEF (AEF) :
             insert_AEF(conn, AEF)
         elif choice == "22" :
             while True :
-                answer = input ("Avant de quitter, voulez vous exporter votre AEF sur un fichier ?  :  ")
+                answer = input ("Avant de quitter, voulez vous exporter votre AEF sur un fichier ? (yes/no) :  ")
                 if answer == "yes" :
                     export_AEF(AEF, "AEF_exported.txt")
                     break
