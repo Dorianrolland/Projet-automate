@@ -61,13 +61,13 @@ def verifword(AEF):
         # Si l'état actuel est une liste, prenez le premier état de la liste
         if isinstance(current_state, list):
             current_state = current_state[0]
+
     if current_state in AEF["final_states"]:
          print("\nVotre mot a été reconnu avec succès par le langage de l'automate")
          return True 
-     else : 
+    else : 
           print ("\nVotre mot n'a pas atteint un état final dans l'automate")
           return False
-
 
 
 def is_complete(AEF):
